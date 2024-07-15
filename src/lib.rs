@@ -49,23 +49,19 @@ mod encode;
 mod status;
 
 use core::fmt::Debug;
-use embedded_hal::blocking::i2c::{Read, Write};
+use embedded_hal::i2c::I2c;
 use encode::{encode_address, encode_command, encode_fast_command};
 pub use status::DacStatus;
 
 /// MCP4725 DAC driver. Wraps an I2C port to send commands to an MCP4725
 #[derive(Debug)]
 pub struct MCP4725<I2C>
-where
-    I2C: Read + Write,
 {
     i2c: I2C,
     address: u8,
 }
 
-impl<I2C, E> MCP4725<I2C>
-where
-    I2C: Read<Error = E> + Write<Error = E>,
+impl<I2C: I2c> MCP4725<I2C>
 {
     /// Construct a new MCP4725 driver instance.
     /// i2c is the initialized i2c driver port to use,
@@ -82,25 +78,25 @@ where
     }
 
     /// Set the dac register
-    pub fn set_dac(&mut self, power: PowerDown, data: u16) -> Result<(), E> {
+    pub fn set_dac(&mut self, power: PowerDown, data: u16) -> Result<(), I2C::Error> {
         let bytes = encode_command(CommandType::WriteDac, power, data);
         self.i2c.write(self.address, &bytes)
     }
 
     /// Set the dac and eeprom registers
-    pub fn set_dac_and_eeprom(&mut self, power: PowerDown, data: u16) -> Result<(), E> {
+    pub fn set_dac_and_eeprom(&mut self, power: PowerDown, data: u16) -> Result<(), I2C::Error> {
         let bytes = encode_command(CommandType::WriteDacAndEEPROM, power, data);
         self.i2c.write(self.address, &bytes)
     }
 
     /// Use the two byte fast command to set the dac register
-    pub fn set_dac_fast(&mut self, power: PowerDown, data: u16) -> Result<(), E> {
+    pub fn set_dac_fast(&mut self, power: PowerDown, data: u16) -> Result<(), I2C::Error> {
         let bytes = encode_fast_command(power, data);
         self.i2c.write(self.address, &bytes)
     }
 
     /// Send read command and return the dac status
-    pub fn read(&mut self) -> Result<DacStatus, E> {
+    pub fn read(&mut self) -> Result<DacStatus, I2C::Error> {
         let mut buffer: [u8; 5] = [0; 5];
         self.i2c.read(self.address, &mut buffer)?;
 
@@ -109,14 +105,14 @@ where
 
     /// Send a wake-up command over the I2C bus.
     /// WARNING: This is a general call command and can wake-up other devices on the bus as well.
-    pub fn wake_up(&mut self) -> Result<(), E> {
+    pub fn wake_up(&mut self) -> Result<(), I2C::Error> {
         self.i2c.write(0x00, &[0x06u8])?;
         Ok(())
     }
 
     /// Send a reset command on the I2C bus.
     /// WARNING: This is a general call command and can reset other devices on the bus as well.
-    pub fn reset(&mut self) -> Result<(), E> {
+    pub fn reset(&mut self) -> Result<(), I2C::Error> {
         self.i2c.write(0x00, &[0x09u8])?;
         Ok(())
     }
