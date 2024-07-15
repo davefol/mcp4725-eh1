@@ -1,13 +1,13 @@
 [package]
-name = "mcp4725"
+name = "mcp4725-eh1"
 version = "0.4.2"
 edition = "2018"
 rust-version = "1.38"
 
-authors = ["Mendelt Siebenga <msiebenga@gmail.com>"]
+authors = ["Mendelt Siebenga <msiebenga@gmail.com>", "David Folarin <dof5@cornell.edu>"]
 license = "MIT/Apache-2.0"
 description = "Microchip MCP4725 DAC Driver for Rust Embedded HAL"
-repository = "https://github.com/mendelt/mcp4725"
+repository = "https://github.com/davefol/mcp4725-eh1"
 categories = ["no-std", "embedded"]
 keywords = ["dac", "i2c"]
 readme = "README.md"
